@@ -16,7 +16,7 @@ class TagFactory extends Factory
      */
     public function definition()
     {
-        $name = fake()->sentence();
+        $name = fake()->word();
 
         return [
             'name' => $name,

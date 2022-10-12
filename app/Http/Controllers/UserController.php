@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
-use Illuminate\Database\QueryException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -70,7 +69,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST, 
-                'Cannot find user: ' . $e->getMessage()
+                'Cannot update user: ' . $e->getMessage()
             );
         }
 

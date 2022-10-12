@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -17,7 +18,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        return Post::paginate();
+        return PostResource::collection(
+            Post::with(['author', 'tag'])->paginate()
+        );
     }
 
     /**
@@ -43,7 +46,7 @@ class PostController extends Controller
                 'tag_id' => $request->tag_id,
             ]);
 
-            return response()->json($post);
+            return new PostResource($post);
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
@@ -60,7 +63,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return $post->getAttributes();
+        return new PostResource($post);
     }
 
     /**
@@ -90,7 +93,7 @@ class PostController extends Controller
                 ]);
             }
 
-            return response()->json($post);
+            return new PostResource($post);
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
@@ -109,6 +112,6 @@ class PostController extends Controller
     {
         $post->delete();
 
-        return response()->json(true);
+        return response()->json(['data' => true]);
     }
 }

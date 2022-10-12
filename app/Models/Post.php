@@ -11,6 +11,11 @@ class Post extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function tag()
     {
         return $this->belongsTo(Tag::class);

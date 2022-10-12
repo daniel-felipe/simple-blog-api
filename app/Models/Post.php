@@ -9,6 +9,8 @@ class Post extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function tag()
     {
         return $this->belongsTo(Tag::class);

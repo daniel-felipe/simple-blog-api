@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
-use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PostController extends Controller
 {
@@ -14,7 +17,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        return Post::paginate();
     }
 
     /**
@@ -23,9 +26,30 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        //
+        $request->validated();
+
+        try {
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('public/thumbnails');
+            }
+
+            $post = Post::create([
+                'title' => $request->title,
+                'slug' => str()->slug($request->title),
+                'thumbnail' => $path ?? 'default.png',
+                'user_id' => $request->user_id,
+                'tag_id' => $request->tag_id,
+            ]);
+
+            return response()->json($post);
+        } catch (\Exception $e) {
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                'Cannot save new post: ' . $e->getMessage()
+            );
+        }
     }
 
     /**
@@ -36,7 +60,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return $post->getAttributes();
     }
 
     /**
@@ -46,9 +70,33 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
-        //
+        $request->validated();
+
+        try {
+            $post->update([
+                'title' => $request->title,
+                'slug' => str()->slug($request->title),
+                'user_id' => $request->user_id,
+                'tag_id' => $request->tag_id,
+            ]);
+
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('public/thumbnails');
+
+                $post->update([
+                    'thumbnail' => $path,
+                ]);
+            }
+
+            return response()->json($post);
+        } catch (\Exception $e) {
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                'Cannot edit post: ' . $e->getMessage(),
+            );
+        }
     }
 
     /**
@@ -59,6 +107,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+
+        return response()->json(true);
     }
 }

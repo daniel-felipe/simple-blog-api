@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Http\Resources\UserResource;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
-use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -17,7 +18,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::paginate();
+        return UserResource::collection(User::with('posts')->paginate());
     }
 
     /**
@@ -31,7 +32,7 @@ class UserController extends Controller
         try {
             $user = User::create($request->validated());
 
-            return response()->json($user);
+            return new UserResource($user);
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
@@ -46,11 +47,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $user)
     {
-        $user = User::findOrFail($id)->get();
-
-        return response()->json($user);
+        return new UserResource($user);
     }
 
     /**
@@ -60,22 +59,20 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
         try {
-            User::findOrFail($id)->update(
+            $user->update(
                 $request->validated()
             );
         } catch (\Exception $e) {
             throw new HttpException(
-                Response::HTTP_BAD_REQUEST, 
+                Response::HTTP_BAD_REQUEST,
                 'Cannot update user: ' . $e->getMessage()
             );
         }
 
-        return response()->json([
-            'data' => 'User updated successfully!'
-        ]);
+        return new UserResource($user);
     }
 
     /**

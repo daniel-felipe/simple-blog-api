@@ -23,6 +23,7 @@ class PostFactory extends Factory
         return [
             'title' => $title,
             'slug' => str()->slug($title),
+            'content' => fake()->paragraph(6),
             'thumbnail' => fake()->name() . '.png',
             'user_id' => User::factory()->create(),
             'tag_id' => Tag::factory()->create(),

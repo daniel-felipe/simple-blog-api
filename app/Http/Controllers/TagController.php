@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -17,7 +18,7 @@ class TagController extends Controller
      */
     public function index()
     {
-        return Tag::paginate();
+        return TagResource::collection(Tag::paginate());
     }
 
     /**
@@ -38,7 +39,7 @@ class TagController extends Controller
                 'slug' => str()->slug($data['name'])
             ]);
 
-            return response()->json($tag);
+            return new TagResource($tag);
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
@@ -55,7 +56,7 @@ class TagController extends Controller
      */
     public function show(Tag $tag)
     {
-        return response()->json($tag->getAttributes());
+        return new TagResource($tag);
     }
 
     /**
@@ -77,7 +78,7 @@ class TagController extends Controller
                 'slug' => str()->slug($data['name']),
             ]);
 
-            return response()->json($tag);
+            return new TagResource($tag);
         } catch (\Exception $e) {
             throw new HttpException(
                 Response::HTTP_BAD_REQUEST,
